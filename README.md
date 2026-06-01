@@ -23,34 +23,6 @@ El diseño muestra un `Hero` llamativo con fondo dinámico y texto grande estilo
 - Estilo inmersivo con fondo visible, blur y efectos neon
 - Modal de checkout para revisar el carrito y completar la compra
 
-## Qué se modificó
-
-### `src/components/HeroSecurify.jsx`
-
-- Se cambió el hero original tipo SaaS por un hero orientado a tienda TCG.
-- Se agregó un overlay de fondo oscuro y gradientes radiales para mayor ambientación.
-- Se ajustó el contenido para mostrar un mensaje de tienda neon y métricas estilizadas.
-- Se renombró de `.tsx` a `.jsx` y se removió la tipificación TypeScript para que funcione con la configuración JS del proyecto.
-
-### `src/views/StoreView.jsx`
-
-- Se mejoró el layout del storefront, enfocando el contenido en la tienda.
-- Se cambió la sección de navegación de secciones a una barra horizontal scrollable.
-- Se eliminaron los elementos tipo footer que daban apariencia de resumen poco estética.
-- Se agregó un panel principal con borde, blur y descripción de la tienda.
-- Se mantuvo la lógica de carrito, categorías, secciones y productos.
-
-### `src/components/GameCard.jsx`
-
-- Se rediseñaron las tarjetas de producto con un estilo más 3D y hover marcado.
-- Se mejoró la presentación de imagen con sombras, degradados y un contenedor glass.
-- Se conservó la información de `baseCost`, `montoLabel` y `precioVenta`.
-- Se mantuvo el botón de agregar al carrito y el cálculo de ganancia.
-
-### `tsconfig.json`
-
-- Se añadió `"ignoreDeprecations": "6.0"` para evitar que TypeScript 7 detuviera la compilación por una advertencia de `moduleResolution=node10`.
-
 ## Estructura principal del proyecto
 
 - `app/`
