@@ -123,7 +123,7 @@ const LandingView = () => {
       {/* ========================================================
           NAVBAR FLOTANTE GILDED (Glassmorphism de Alta Costura)
           ======================================================== */}
-      <nav className="fixed top-5 left-4 right-4 z-50 flex items-center justify-between gap-4 px-6 py-4 rounded-[1.8rem] border bg-neutral-950/40 shadow-[0_20px_60px_rgba(0,0,0,0.9)] backdrop-blur-2xl transition-all duration-500"
+      <nav className="fixed top-5 left-4 right-4 z-[60] flex items-center justify-between gap-4 px-6 py-4 rounded-[1.8rem] border bg-neutral-950/40 shadow-[0_20px_60px_rgba(0,0,0,0.9)] backdrop-blur-2xl transition-all duration-500"
         style={{
           borderColor: 'rgba(255, 255, 255, 0.08)',
           boxShadow: `0 20px 60px rgba(0,0,0,0.9), inset 0 1px 1px rgba(255,255,255,0.05)`
@@ -208,7 +208,7 @@ const LandingView = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-24 left-4 right-4 z-45 flex flex-col gap-2 rounded-3xl border bg-neutral-950/95 p-6 shadow-2xl backdrop-blur-3xl md:hidden"
+            className="fixed top-24 left-4 right-4 z-[55] flex flex-col gap-2 rounded-3xl border bg-neutral-950/95 p-6 shadow-2xl backdrop-blur-3xl md:hidden"
             style={{ borderColor: 'rgba(217, 165, 11, 0.2)' }}
           >
             <button 

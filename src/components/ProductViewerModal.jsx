@@ -86,6 +86,35 @@ const ProductViewerModal = ({ isOpen, onClose, product, accentColor = '#22d3ee',
     isInteracting.current = false;
   };
 
+  // Soporte táctil interactivo en móviles
+  const handleTouchStart = () => {
+    isInteracting.current = true;
+  };
+
+  const handleTouchMove = (e) => {
+    isInteracting.current = true;
+    if (e.touches.length === 0) return;
+
+    const touch = e.touches[0];
+    const rect = e.currentTarget.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    
+    const clientX = touch.clientX - rect.left;
+    const clientY = touch.clientY - rect.top;
+
+    // Normalizar coordenadas en el rango [-0.5, 0.5] y limitarlas a los bordes
+    const x = Math.max(-0.5, Math.min(0.5, (clientX / width) - 0.5));
+    const y = Math.max(-0.5, Math.min(0.5, (clientY / height) - 0.5));
+
+    mouseX.set(x);
+    mouseY.set(y);
+  };
+
+  const handleTouchEnd = () => {
+    isInteracting.current = false;
+  };
+
   // Consumir directamente la URL externa proporcionada en el modelo
   const imageSrc = product.image || `/assets/cartas/${product.id}.png`;
 
@@ -131,7 +160,10 @@ const ProductViewerModal = ({ isOpen, onClose, product, accentColor = '#22d3ee',
               <motion.div
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
-                className="relative w-full max-w-[220px] sm:max-w-[280px] md:max-w-[320px] aspect-[2.5/3.5] rounded-3xl cursor-grab active:cursor-grabbing select-none"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                className="relative w-full max-w-[220px] sm:max-w-[280px] md:max-w-[320px] aspect-[2.5/3.5] rounded-3xl cursor-grab active:cursor-grabbing select-none touch-none"
                 style={{
                   transformStyle: 'preserve-3d',
                   perspective: 1200,
