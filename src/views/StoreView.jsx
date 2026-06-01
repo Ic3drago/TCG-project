@@ -187,7 +187,7 @@ const StoreView = () => {
       <AnimatePresence>
         {offersOpen && (
           <motion.div 
-            className="fixed inset-0 z-50 overflow-y-auto bg-black/85" 
+            className="fixed inset-0 z-[70] overflow-y-auto bg-black/85" 
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }}
@@ -257,7 +257,7 @@ const StoreView = () => {
       <AnimatePresence>
         {checkoutOpen && (
           <motion.div 
-            className="fixed inset-0 z-50 overflow-y-auto bg-black/80" 
+            className="fixed inset-0 z-[70] overflow-y-auto bg-black/80" 
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }}

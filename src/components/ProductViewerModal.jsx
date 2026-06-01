@@ -121,7 +121,7 @@ const ProductViewerModal = ({ isOpen, onClose, product, accentColor = '#22d3ee',
   return (
     <AnimatePresence>
       {/* Fondo oscuro: Reducimos el desenfoque anidado pesado de backdrop-blur-2xl a backdrop-blur-md y aumentamos opacidad bg-black/90 para ahorrar GPU en Firefox */}
-      <div className="fixed inset-0 z-50 overflow-y-auto bg-black/90 backdrop-blur-md">
+      <div className="fixed inset-0 z-[70] overflow-y-auto bg-black/90 backdrop-blur-md">
         
         {/* Fondo oscuro cerrable - ahora fixed para abarcar toda la pantalla real */}
         <div 
