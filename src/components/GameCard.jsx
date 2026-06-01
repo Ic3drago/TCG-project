@@ -81,13 +81,13 @@ const GameCard = ({ product, accentColor = '#22d3ee', onAdd, onView }) => {
         willChange: 'transform'
       }}
       // Optimización de Firefox: Usar backdrop-blur-md (más liviano) con bg-neutral-950/85 (más opaco) para reducir el procesamiento compositor de pixeles detrás de la tarjeta.
-      className="relative flex flex-col h-full cursor-pointer overflow-hidden rounded-[2.2rem] border border-white/5 bg-neutral-950/85 p-5 backdrop-blur-md select-none"
+      className="relative flex flex-col h-full cursor-pointer overflow-hidden rounded-[1.8rem] md:rounded-[2.2rem] border border-white/5 bg-neutral-950/85 p-4 md:p-5 backdrop-blur-md select-none"
     >
       {/* CAPA DE SOMBRA Y BORDE GLOW DE HOVER OPTIMIZADA:
           En lugar de transicionar box-shadow y border-color en el elemento principal (lo que fuerza repintado completo),
           animamos únicamente la OPACIDAD de este contenedor absoluto que corre 100% sobre la GPU. */}
       <div 
-        className="absolute inset-0 rounded-[2.2rem] pointer-events-none z-0 transition-opacity duration-500 ease-out border border-amber-500/35"
+        className="absolute inset-0 rounded-[1.8rem] md:rounded-[2.2rem] pointer-events-none z-0 transition-opacity duration-500 ease-out border border-amber-500/35"
         style={{
           boxShadow: `0 30px 60px -15px rgba(0, 0, 0, 0.9), 0 0 30px ${accentColor}20`,
           opacity: hovered ? 1 : 0,
@@ -140,25 +140,27 @@ const GameCard = ({ product, accentColor = '#22d3ee', onAdd, onView }) => {
         </div>
 
         {/* Imagen del Producto (Uso correcto del componente <Image> de Next.js con fill) */}
-        <div className="relative overflow-hidden rounded-2xl shadow-[0_12px_30px_rgba(0,0,0,0.6)] border border-white/5 aspect-[4/3] bg-neutral-950">
+        <div className={`relative overflow-hidden rounded-2xl shadow-[0_12px_30px_rgba(0,0,0,0.6)] border border-white/5 bg-neutral-950 ${
+          product.type === 'card' ? 'aspect-[2.5/3.5] py-2' : 'aspect-[4/3]'
+        }`}>
           <Image
             src={imageSrc}
             alt={product.name}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-            className="object-cover transition-transform duration-[1000ms] ease-out"
+            className={`${product.type === 'card' ? 'object-contain p-1' : 'object-cover'} transition-transform duration-[1000ms] ease-out`}
             style={{
-              transform: hovered ? 'scale(1.05)' : 'scale(1)',
+              transform: hovered ? 'scale(1.03)' : 'scale(1)',
               willChange: 'transform'
             }}
             priority={product.section === 'cards'} // Carga con fetchpriority alta a las cartas principales
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-transparent to-transparent opacity-85" />
+          <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/80 via-transparent to-transparent pointer-events-none z-10" />
         </div>
 
         {/* Textos Informativos */}
         <div className="space-y-1.5 mt-1 flex-grow">
-          <h3 className="text-lg font-bold tracking-tight text-white transition-colors duration-300" style={{ color: hovered ? '#ffffff' : '#f5f5f7' }}>
+          <h3 className="text-base md:text-lg font-bold tracking-tight text-white transition-colors duration-300" style={{ color: hovered ? '#ffffff' : '#f5f5f7' }}>
             {product.name}
           </h3>
           <p className="text-xs leading-relaxed text-neutral-400 line-clamp-2 min-h-[2rem]">
@@ -182,7 +184,7 @@ const GameCard = ({ product, accentColor = '#22d3ee', onAdd, onView }) => {
             e.stopPropagation();
             onAdd();
           }}
-          className="mt-2 w-full rounded-xl py-3.5 text-xs font-bold uppercase tracking-[0.2em] text-neutral-950 transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+          className="mt-2 w-full rounded-xl py-2.5 md:py-3.5 text-xs font-bold uppercase tracking-[0.1em] md:tracking-[0.2em] text-neutral-950 transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
           style={{
             backgroundColor: accentColor,
             backgroundImage: `linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, transparent 100%)`,

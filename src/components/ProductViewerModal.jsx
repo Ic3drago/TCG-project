@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { motion, useMotionValue, useTransform, useSpring, AnimatePresence } from 'framer-motion';
 import { X, ShoppingCart, Award } from 'lucide-react';
 import Image from 'next/image';
@@ -22,10 +22,41 @@ const ProductViewerModal = ({ isOpen, onClose, product, accentColor = '#22d3ee',
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
+  // Ref para rastrear si el usuario está interactuando activamente
+  const isInteracting = useRef(false);
+
   // Configuración de resortes (Physics Engine para efecto TCG Pocket)
   const springConfig = { stiffness: 120, damping: 18, mass: 0.8 };
   const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [18, -18]), springConfig);
-  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-18, 18]), springConfig);
+  const rotateY = useSpring(useSpring(useTransform(mouseX, [-0.5, 0.5], [-18, 18]), springConfig));
+
+  // Bucle de física suave para balanceo automático de cartas (TCG Pocket) cuando no hay mouse activo (p. ej. en móviles)
+  useEffect(() => {
+    if (!isOpen) return;
+    
+    let animationFrameId;
+    const startTime = Date.now();
+
+    const animate = () => {
+      if (!isInteracting.current) {
+        const elapsed = (Date.now() - startTime) / 1000;
+        
+        // Oscilación en círculo con velocidad y amplitud premium (TCG Pocket feel)
+        const x = Math.sin(elapsed * 1.2) * 0.15;
+        const y = Math.cos(elapsed * 0.8) * 0.15;
+
+        mouseX.set(x);
+        mouseY.set(y);
+      }
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [isOpen, mouseX, mouseY]);
 
   // Efecto de brillo de refracción metálica (Holografía Foil)
   const foilBg = useTransform(
@@ -36,6 +67,7 @@ const ProductViewerModal = ({ isOpen, onClose, product, accentColor = '#22d3ee',
   if (!isOpen || !product) return null;
 
   const handleMouseMove = (e) => {
+    isInteracting.current = true;
     const rect = e.currentTarget.getBoundingClientRect();
     const width = rect.width;
     const height = rect.height;
@@ -51,9 +83,7 @@ const ProductViewerModal = ({ isOpen, onClose, product, accentColor = '#22d3ee',
   };
 
   const handleMouseLeave = () => {
-    // Retornar suavemente al punto cero
-    mouseX.set(0);
-    mouseY.set(0);
+    isInteracting.current = false;
   };
 
   // Consumir directamente la URL externa proporcionada en el modelo
@@ -62,97 +92,98 @@ const ProductViewerModal = ({ isOpen, onClose, product, accentColor = '#22d3ee',
   return (
     <AnimatePresence>
       {/* Fondo oscuro: Reducimos el desenfoque anidado pesado de backdrop-blur-2xl a backdrop-blur-md y aumentamos opacidad bg-black/90 para ahorrar GPU en Firefox */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-10 overflow-y-auto bg-black/90 backdrop-blur-md">
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-black/90 backdrop-blur-md">
         
-        {/* Fondo oscuro cerrable */}
+        {/* Fondo oscuro cerrable - ahora fixed para abarcar toda la pantalla real */}
         <div 
           onClick={onClose} 
-          className="absolute inset-0 z-0 cursor-zoom-out"
+          className="fixed inset-0 z-0 cursor-zoom-out"
         />
 
-        {/* Botón flotante superior de cierre dorado */}
-        <button 
-          onClick={onClose}
-          className="absolute top-6 right-6 z-50 rounded-full border border-white/10 bg-neutral-900/60 p-3.5 text-neutral-300 hover:text-white hover:border-yellow-500/40 transition-colors shadow-lg cursor-pointer"
-        >
-          <X className="h-5 w-5" />
-        </button>
-
-        {/* Contenedor del Modal Premium Gilded
-            Optimización: Removemos el costoso backdrop-blur-xl redundante porque ya está encima de una capa opaca/borrosa.
-            Esto previene que Firefox dibuje doble pasada de desenfoque de píxeles superpuestos. */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          transition={{ duration: 0.4, ease: 'easeOut' }}
-          className="relative z-10 w-full max-w-5xl rounded-[3rem] border border-white/10 bg-neutral-950/95 shadow-2xl overflow-hidden p-6 md:p-10 grid gap-8 lg:grid-cols-12"
-          style={{
-            borderColor: 'rgba(255, 255, 255, 0.08)',
-            boxShadow: `0 35px 80px rgba(0,0,0,0.95), inset 0 1px 1px rgba(255,255,255,0.05), 0 0 40px ${accentColor}10`
-          }}
-        >
+        {/* Contenedor Flex que se estira y permite centrar y realizar scroll completo */}
+        <div className="flex min-h-full items-center justify-center p-4 md:p-10 text-center">
           
-          {/* ========================================================
-              COLUMNA IZQUIERDA: VISOR INTERACTIVO 3D TCG POCKET
-              ======================================================== */}
-          <div className="lg:col-span-6 flex items-center justify-center min-h-[350px] md:min-h-[500px]">
-            <motion.div
-              onMouseMove={handleMouseMove}
-              onMouseLeave={handleMouseLeave}
-              className="relative w-full max-w-[320px] aspect-[2.5/3.5] rounded-3xl cursor-grab active:cursor-grabbing select-none"
-              style={{
-                transformStyle: 'preserve-3d',
-                perspective: 1200,
-                rotateX: rotateX,
-                rotateY: rotateY,
-                boxShadow: `0 30px 60px -15px rgba(0, 0, 0, 0.85)`,
-                willChange: 'transform'
-              }}
-            >
-              
-              {/* Estuche protector acrílico imantado premium */}
-              <div className="absolute inset-0 rounded-[1.8rem] border border-white/15 bg-neutral-950/30 z-10 pointer-events-none"
+          {/* Botón flotante superior de cierre dorado - FIXED para que siempre flote y no se pierda al hacer scroll */}
+          <button 
+            onClick={onClose}
+            className="fixed top-4 right-4 z-50 rounded-full border border-white/10 bg-neutral-900/80 p-2.5 text-neutral-300 hover:text-white hover:border-yellow-500/40 transition-colors shadow-lg cursor-pointer md:top-6 md:right-6 md:p-3.5"
+          >
+            <X className="h-5 w-5" />
+          </button>
+
+          {/* Contenedor del Modal Premium Gilded */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+            className="relative z-10 w-full max-w-5xl rounded-3xl md:rounded-[3rem] border border-white/10 bg-neutral-950/95 shadow-2xl overflow-hidden p-5 sm:p-8 md:p-10 grid gap-6 md:gap-8 lg:grid-cols-12 text-left"
+            style={{
+              borderColor: 'rgba(255, 255, 255, 0.08)',
+              boxShadow: `0 35px 80px rgba(0,0,0,0.95), inset 0 1px 1px rgba(255,255,255,0.05), 0 0 40px ${accentColor}10`
+            }}
+          >
+            
+            {/* ========================================================
+                COLUMNA IZQUIERDA: VISOR INTERACTIVO 3D TCG POCKET
+                ======================================================== */}
+            <div className="lg:col-span-6 flex items-center justify-center min-h-[280px] sm:min-h-[350px] md:min-h-[500px]">
+              <motion.div
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
+                className="relative w-full max-w-[220px] sm:max-w-[280px] md:max-w-[320px] aspect-[2.5/3.5] rounded-3xl cursor-grab active:cursor-grabbing select-none"
                 style={{
-                  boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.1), inset 0 0 10px rgba(0,0,0,0.8)'
+                  transformStyle: 'preserve-3d',
+                  perspective: 1200,
+                  rotateX: rotateX,
+                  rotateY: rotateY,
+                  boxShadow: `0 30px 60px -15px rgba(0, 0, 0, 0.85)`,
+                  willChange: 'transform'
                 }}
-              />
-
-              {/* Tornillo imantado superior decorativo */}
-              <div className="absolute top-3.5 left-1/2 -translate-x-1/2 h-3.5 w-3.5 rounded-full border border-white/20 bg-neutral-800 shadow-inner z-30 flex items-center justify-center">
-                <div className="h-1 w-1 rounded-full bg-yellow-500/80" />
-              </div>
-
-              {/* RENDERIZADO CONDICIONAL: Capa holográfica Foil de refracción prismática */}
-              {product.isFoil && (
-                <motion.div 
-                  className="absolute inset-2 rounded-2xl pointer-events-none z-20 transition-opacity duration-300"
+              >
+                
+                {/* Estuche protector acrílico imantado premium */}
+                <div className="absolute inset-0 rounded-[1.8rem] border border-white/15 bg-neutral-950/30 z-10 pointer-events-none"
                   style={{
-                    background: foilBg,
-                    mixBlendMode: 'color-dodge',
-                    opacity: 0.85,
-                    willChange: 'background'
+                    boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.1), inset 0 0 10px rgba(0,0,0,0.8)'
                   }}
                 />
-              )}
 
-              {/* Brillo lineal exterior de estuche acrílico */}
-              <div className="absolute inset-0 rounded-[1.8rem] bg-gradient-to-tr from-white/0 via-white/5 to-white/0 pointer-events-none z-20" />
+                {/* Tornillo imantado superior decorativo */}
+                <div className="absolute top-3.5 left-1/2 -translate-x-1/2 h-3.5 w-3.5 rounded-full border border-white/20 bg-neutral-800 shadow-inner z-30 flex items-center justify-center">
+                  <div className="h-1 w-1 rounded-full bg-yellow-500/80" />
+                </div>
 
-              {/* Imagen del Producto en Inspección con next/image y fill */}
-              <div className="absolute inset-2 overflow-hidden rounded-2xl bg-neutral-950 border border-white/5 shadow-inner">
-                <Image
-                  src={imageSrc}
-                  alt={product.name}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 30vw"
-                  className="object-cover"
-                  priority={true} // El visor del modal es de máxima prioridad
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/80 via-transparent to-transparent pointer-events-none z-10" />
-              </div>
-            </motion.div>
-          </div>
+                {/* RENDERIZADO CONDICIONAL: Capa holográfica Foil de refracción prismática */}
+                {product.isFoil && (
+                  <motion.div 
+                    className="absolute inset-2 rounded-2xl pointer-events-none z-20 transition-opacity duration-300"
+                    style={{
+                      background: foilBg,
+                      mixBlendMode: 'color-dodge',
+                      opacity: 0.85,
+                      willChange: 'background'
+                    }}
+                  />
+                )}
+
+                {/* Brillo lineal exterior de estuche acrílico */}
+                <div className="absolute inset-0 rounded-[1.8rem] bg-gradient-to-tr from-white/0 via-white/5 to-white/0 pointer-events-none z-20" />
+
+                {/* Imagen del Producto en Inspección con next/image y fill */}
+                <div className="absolute inset-2 overflow-hidden rounded-2xl bg-neutral-950 border border-white/5 shadow-inner">
+                  <Image
+                    src={imageSrc}
+                    alt={product.name}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 30vw"
+                    className="object-contain p-1"
+                    priority={true} // El visor del modal es de máxima prioridad
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/80 via-transparent to-transparent pointer-events-none z-10" />
+                </div>
+              </motion.div>
+            </div>
 
           {/* ========================================================
               COLUMNA DERECHA: CARACTERÍSTICAS Y COMPRA PREMIUM
@@ -234,6 +265,7 @@ const ProductViewerModal = ({ isOpen, onClose, product, accentColor = '#22d3ee',
           </div>
 
         </motion.div>
+        </div>
       </div>
     </AnimatePresence>
   );

@@ -115,23 +115,25 @@ const StoreView = () => {
                 </p>
               </div>
 
-              {/* Selector de Categorías (Píldora Horizontal) */}
-              <div className="flex flex-wrap gap-2.5 rounded-3xl bg-black/60 p-2 border border-white/5 shadow-inner">
-                {categories.map((category) => (
-                  <button
-                    key={category.id}
-                    type="button"
-                    onClick={() => changeCategory(category.id)}
-                    className="relative rounded-2xl px-5 py-3.5 text-xs font-bold uppercase tracking-widest transition-all duration-300 select-none cursor-pointer"
-                    style={{
-                      backgroundColor: currentCategory.id === category.id ? category.accentColor : 'transparent',
-                      color: currentCategory.id === category.id ? '#000' : 'rgba(255,255,255,0.6)',
-                      boxShadow: currentCategory.id === category.id ? `0 4px 20px ${category.accentColor}40` : 'none'
-                    }}
-                  >
-                    {category.name}
-                  </button>
-                ))}
+              {/* Selector de Categorías (Píldoras Gilded) - Desplazable horizontalmente en móviles */}
+              <div className="overflow-x-auto max-w-full pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                <div className="flex sm:flex-wrap gap-2.5 rounded-3xl bg-black/60 p-2 border border-white/5 shadow-inner min-w-max sm:min-w-0">
+                  {categories.map((category) => (
+                    <button
+                      key={category.id}
+                      type="button"
+                      onClick={() => changeCategory(category.id)}
+                      className="relative rounded-2xl px-5 py-3.5 text-xs font-bold uppercase tracking-widest transition-all duration-300 select-none cursor-pointer"
+                      style={{
+                        backgroundColor: currentCategory.id === category.id ? category.accentColor : 'transparent',
+                        color: currentCategory.id === category.id ? '#000' : 'rgba(255,255,255,0.6)',
+                        boxShadow: currentCategory.id === category.id ? `0 4px 20px ${category.accentColor}40` : 'none'
+                      }}
+                    >
+                      {category.name}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -161,7 +163,7 @@ const StoreView = () => {
           <AnimatePresence mode="popLayout">
             <motion.div 
               key={`${currentCategory.id}-${currentSection?.id || ''}`}
-              className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"
+              className="grid gap-6 grid-cols-1 max-w-md mx-auto sm:max-w-none sm:grid-cols-2 lg:grid-cols-3"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -30 }}
@@ -185,66 +187,68 @@ const StoreView = () => {
       <AnimatePresence>
         {offersOpen && (
           <motion.div 
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 px-4 py-6 backdrop-blur-md" 
+            className="fixed inset-0 z-50 overflow-y-auto bg-black/85" 
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }}
           >
-            <motion.div 
-              className="relative w-full max-w-lg rounded-[2.5rem] border border-white/10 bg-neutral-950/95 p-8 shadow-2xl shadow-black/85 backdrop-blur-2xl text-center" 
-              initial={{ scale: 0.95, opacity: 0 }} 
-              animate={{ scale: 1, opacity: 1 }} 
-              exit={{ scale: 0.95, opacity: 0 }} 
-              transition={{ duration: 0.25, ease: 'easeOut' }}
-              style={{
-                borderColor: `${currentCategory.accentColor}30`,
-                boxShadow: `0 30px 100px rgba(0,0,0,0.8), 0 0 35px ${currentCategory.accentColor}15`
-              }}
-            >
-              {/* Botón de Cerrar */}
-              <button 
-                type="button" 
-                onClick={() => setOffersOpen(false)} 
-                className="absolute right-6 top-6 rounded-full bg-white/5 border border-white/10 p-3 text-white transition hover:bg-white/10 cursor-pointer"
+            <div className="flex min-h-full items-center justify-center p-4 backdrop-blur-md">
+              <motion.div 
+                className="relative w-full max-w-lg rounded-3xl md:rounded-[2.5rem] border border-white/10 bg-neutral-950/95 p-6 md:p-8 shadow-2xl shadow-black/85 text-center" 
+                initial={{ scale: 0.95, opacity: 0 }} 
+                animate={{ scale: 1, opacity: 1 }} 
+                exit={{ scale: 0.95, opacity: 0 }} 
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+                style={{
+                  borderColor: `${currentCategory.accentColor}30`,
+                  boxShadow: `0 30px 100px rgba(0,0,0,0.8), 0 0 35px ${currentCategory.accentColor}15`
+                }}
               >
-                <X className="h-4 w-4" />
-              </button>
-
-              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-900 border border-white/10 text-white" style={{ color: currentCategory.accentColor, borderColor: `${currentCategory.accentColor}40` }}>
-                <Percent className="h-6 w-6 animate-pulse" />
-              </div>
-
-              <h2 className="text-3xl font-extrabold tracking-tight lowercase">ofertas de temporada</h2>
-              
-              <div className="mt-6 rounded-3xl border border-white/5 bg-white/5 p-6 space-y-4">
-                <p className="text-sm leading-relaxed text-neutral-300">
-                  ¡Desbloquea el máximo potencial de tu mazo! Usa este código promocional exclusivo al momento de pagar y obtén un descuento del **20%** en todas las cartas y manuales.
-                </p>
-
-                <div 
-                  className="rounded-2xl border py-4 text-2xl font-black tracking-[0.25em] select-text text-black cursor-pointer"
-                  style={{
-                    backgroundColor: currentCategory.accentColor,
-                    borderColor: currentCategory.accentColor,
-                    boxShadow: `0 0 15px ${currentCategory.accentColor}30`
-                  }}
+                {/* Botón de Cerrar */}
+                <button 
+                  type="button" 
+                  onClick={() => setOffersOpen(false)} 
+                  className="absolute right-6 top-6 rounded-full bg-white/5 border border-white/10 p-3 text-white transition hover:bg-white/10 cursor-pointer"
                 >
-                  NEXUS20
+                  <X className="h-4 w-4" />
+                </button>
+
+                <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-900 border border-white/10 text-white" style={{ color: currentCategory.accentColor, borderColor: `${currentCategory.accentColor}40` }}>
+                  <Percent className="h-6 w-6 animate-pulse" />
                 </div>
 
-                <p className="text-[10px] text-neutral-500 uppercase tracking-widest">
-                  Válido por tiempo limitado en Pokémon, Magic, Yu-Gi-Oh! y D&D.
-                </p>
-              </div>
+                <h2 className="text-3xl font-extrabold tracking-tight lowercase">ofertas de temporada</h2>
+                
+                <div className="mt-6 rounded-3xl border border-white/5 bg-white/5 p-6 space-y-4">
+                  <p className="text-sm leading-relaxed text-neutral-300">
+                    ¡Desbloquea el máximo potencial de tu mazo! Usa este código promocional exclusivo al momento de pagar y obtén un descuento del **20%** en todas las cartas y manuales.
+                  </p>
 
-              <button 
-                type="button" 
-                onClick={() => setOffersOpen(false)} 
-                className="mt-6 w-full rounded-2xl border border-white/10 bg-white/5 py-4 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-white/10 cursor-pointer"
-              >
-                entendido, ¡a comprar!
-              </button>
-            </motion.div>
+                  <div 
+                    className="rounded-2xl border py-4 text-2xl font-black tracking-[0.25em] select-text text-black cursor-pointer"
+                    style={{
+                      backgroundColor: currentCategory.accentColor,
+                      borderColor: currentCategory.accentColor,
+                      boxShadow: `0 0 15px ${currentCategory.accentColor}30`
+                    }}
+                  >
+                    NEXUS20
+                  </div>
+
+                  <p className="text-[10px] text-neutral-500 uppercase tracking-widest">
+                    Válido por tiempo limitado en Pokémon, Magic, Yu-Gi-Oh! y D&D.
+                  </p>
+                </div>
+
+                <button 
+                  type="button" 
+                  onClick={() => setOffersOpen(false)} 
+                  className="mt-6 w-full rounded-2xl border border-white/10 bg-white/5 py-4 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-white/10 cursor-pointer"
+                >
+                  entendido, ¡a comprar!
+                </button>
+              </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -253,101 +257,103 @@ const StoreView = () => {
       <AnimatePresence>
         {checkoutOpen && (
           <motion.div 
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 py-6 backdrop-blur-md" 
+            className="fixed inset-0 z-50 overflow-y-auto bg-black/80" 
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }}
           >
-            <motion.div 
-              className="relative w-full max-w-2xl rounded-[2.5rem] border border-white/10 bg-neutral-950/95 p-8 md:p-10 shadow-2xl shadow-black/80 backdrop-blur-2xl" 
-              initial={{ scale: 0.95, opacity: 0 }} 
-              animate={{ scale: 1, opacity: 1 }} 
-              exit={{ scale: 0.95, opacity: 0 }} 
-              transition={{ duration: 0.25, ease: 'easeOut' }}
-            >
-              {/* Botón de Cerrar */}
-              <button 
-                type="button" 
-                onClick={() => setCheckoutOpen(false)} 
-                className="absolute right-6 top-6 rounded-full bg-white/5 border border-white/10 p-3 text-white transition hover:bg-white/10 cursor-pointer"
+            <div className="flex min-h-full items-center justify-center p-4 backdrop-blur-md">
+              <motion.div 
+                className="relative w-full max-w-2xl rounded-3xl md:rounded-[2.5rem] border border-white/10 bg-neutral-950/95 p-6 md:p-10 shadow-2xl shadow-black/80" 
+                initial={{ scale: 0.95, opacity: 0 }} 
+                animate={{ scale: 1, opacity: 1 }} 
+                exit={{ scale: 0.95, opacity: 0 }} 
+                transition={{ duration: 0.25, ease: 'easeOut' }}
               >
-                <X className="h-4 w-4" />
-              </button>
-
-              {/* Cabecera del Modal */}
-              <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
-                <div>
-                  <h2 className="text-3xl font-extrabold tracking-tight lowercase">finalizar compra</h2>
-                  <p className="mt-2 text-xs text-neutral-400">Total acumulado de tus artículos de TCG</p>
-                </div>
-                <span 
-                  className="inline-flex rounded-2xl border px-5 py-3 text-sm font-extrabold tracking-wider"
-                  style={{
-                    borderColor: `${currentCategory.accentColor}30`,
-                    color: currentCategory.accentColor,
-                    backgroundColor: `${currentCategory.accentColor}0a`
-                  }}
+                {/* Botón de Cerrar */}
+                <button 
+                  type="button" 
+                  onClick={() => setCheckoutOpen(false)} 
+                  className="absolute right-6 top-6 rounded-full bg-white/5 border border-white/10 p-3 text-white transition hover:bg-white/10 cursor-pointer"
                 >
-                  total: {cartTotal} Bs.
-                </span>
-              </div>
+                  <X className="h-4 w-4" />
+                </button>
 
-              {/* Contenido */}
-              {purchaseComplete ? (
-                <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/5 p-8 text-center">
-                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-                    <CreditCard className="h-6 w-6" />
+                {/* Cabecera del Modal */}
+                <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
+                  <div>
+                    <h2 className="text-3xl font-extrabold tracking-tight lowercase">finalizar compra</h2>
+                    <p className="mt-2 text-xs text-neutral-400">Total acumulado de tus artículos de TCG</p>
                   </div>
-                  <h3 className="text-xl font-bold lowercase">compra completada exitosamente</h3>
-                  <p className="mt-3 text-xs leading-relaxed text-neutral-400 max-w-md mx-auto">
-                    Tu pedido en Bolivianos (Bs.) ha sido procesado de forma simulada. La paleta de neón de la tienda se mantiene sincronizada con tu juego favorito.
-                  </p>
-                  <button 
-                    type="button" 
-                    onClick={() => { setPurchaseComplete(false); setCheckoutOpen(false); }} 
-                    className="mt-6 rounded-2xl bg-white text-black px-6 py-3.5 text-xs font-bold uppercase tracking-widest transition hover:bg-neutral-200"
+                  <span 
+                    className="inline-flex rounded-2xl border px-5 py-3 text-sm font-extrabold tracking-wider"
+                    style={{
+                      borderColor: `${currentCategory.accentColor}30`,
+                      color: currentCategory.accentColor,
+                      backgroundColor: `${currentCategory.accentColor}0a`
+                    }}
                   >
-                    cerrar ventana
-                  </button>
+                    total: {cartTotal} Bs.
+                  </span>
                 </div>
-              ) : (
-                <div className="grid gap-6">
-                  {/* Lista de Artículos */}
-                  <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
-                    {cartItems.length ? cartItems.map((item) => (
-                      <div key={item.id} className="rounded-2xl border border-white/5 bg-white/5 p-4 flex items-center justify-between gap-4">
-                        <div>
-                          <p className="text-sm font-bold text-white lowercase">{item.name}</p>
-                          <p className="text-[10px] text-neutral-400 mt-1 uppercase tracking-wider">{item.quantity} unidad(es) × {item.precioVenta} Bs.</p>
-                        </div>
-                        <p className="text-sm font-extrabold" style={{ color: currentCategory.accentColor }}>
-                          {(item.quantity * item.precioVenta).toFixed(2)} Bs.
-                        </p>
-                      </div>
-                    )) : (
-                      <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 p-8 text-center text-xs text-neutral-400">
-                        El carrito se encuentra vacío. ¡Añade algunas cartas y mazos de neón!
-                      </div>
-                    )}
-                  </div>
 
-                  {/* Botón de Pago */}
-                  {cartItems.length > 0 && (
+                {/* Contenido */}
+                {purchaseComplete ? (
+                  <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/5 p-8 text-center">
+                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                      <CreditCard className="h-6 w-6" />
+                    </div>
+                    <h3 className="text-xl font-bold lowercase">compra completada exitosamente</h3>
+                    <p className="mt-3 text-xs leading-relaxed text-neutral-400 max-w-md mx-auto">
+                      Tu pedido en Bolivianos (Bs.) ha sido procesado de forma simulada. La paleta de neón de la tienda se mantiene sincronizada con tu juego favorito.
+                    </p>
                     <button 
                       type="button" 
-                      onClick={() => setPurchaseComplete(true)} 
-                      className="w-full rounded-2xl py-4 text-xs font-bold uppercase tracking-widest text-black transition-all hover:scale-[1.02] active:scale-[0.98]"
-                      style={{
-                        backgroundColor: currentCategory.accentColor,
-                        boxShadow: `0 0 20px ${currentCategory.accentColor}40`
-                      }}
+                      onClick={() => { setPurchaseComplete(false); setCheckoutOpen(false); }} 
+                      className="mt-6 rounded-2xl bg-white text-black px-6 py-3.5 text-xs font-bold uppercase tracking-widest transition hover:bg-neutral-200"
                     >
-                      confirmar y pagar
+                      cerrar ventana
                     </button>
-                  )}
-                </div>
-              )}
-            </motion.div>
+                  </div>
+                ) : (
+                  <div className="grid gap-6">
+                    {/* Lista de Artículos */}
+                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                      {cartItems.length ? cartItems.map((item) => (
+                        <div key={item.id} className="rounded-2xl border border-white/5 bg-white/5 p-4 flex items-center justify-between gap-4">
+                          <div>
+                            <p className="text-sm font-bold text-white lowercase">{item.name}</p>
+                            <p className="text-[10px] text-neutral-400 mt-1 uppercase tracking-wider">{item.quantity} unidad(es) × {item.precioVenta} Bs.</p>
+                          </div>
+                          <p className="text-sm font-extrabold" style={{ color: currentCategory.accentColor }}>
+                            {(item.quantity * item.precioVenta).toFixed(2)} Bs.
+                          </p>
+                        </div>
+                      )) : (
+                        <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 p-8 text-center text-xs text-neutral-400">
+                          El carrito se encuentra vacío. ¡Añade algunas cartas y mazos de neón!
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Botón de Pago */}
+                    {cartItems.length > 0 && (
+                      <button 
+                        type="button" 
+                        onClick={() => setPurchaseComplete(true)} 
+                        className="w-full rounded-2xl py-4 text-xs font-bold uppercase tracking-widest text-black transition-all hover:scale-[1.02] active:scale-[0.98]"
+                        style={{
+                          backgroundColor: currentCategory.accentColor,
+                          boxShadow: `0 0 20px ${currentCategory.accentColor}40`
+                        }}
+                      >
+                        confirmar y pagar
+                      </button>
+                    )}
+                  </div>
+                )}
+              </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -515,24 +515,26 @@ const LandingView = () => {
                 </p>
               </div>
 
-              {/* Selector de Categorías (Píldoras Gilded) */}
-              <div className="flex flex-wrap gap-2.5 rounded-2xl bg-neutral-950/60 p-2 border border-white/5 shadow-inner">
-                {categories.map((category) => (
-                  <button
-                    key={category.id}
-                    type="button"
-                    onClick={() => changeCategory(category.id)}
-                    className="relative rounded-xl px-5 py-3 text-[11px] font-bold uppercase tracking-widest transition-all duration-300 cursor-pointer select-none"
-                    style={{
-                      backgroundColor: currentCategory.id === category.id ? category.accentColor : 'transparent',
-                      color: currentCategory.id === category.id ? '#0a0a0a' : 'rgba(255,255,255,0.65)',
-                      boxShadow: currentCategory.id === category.id ? `0 4px 20px ${category.accentColor}30` : 'none',
-                      fontWeight: currentCategory.id === category.id ? '800' : '500'
-                    }}
-                  >
-                    {category.name}
-                  </button>
-                ))}
+              {/* Selector de Categorías (Píldoras Gilded) - Desplazable horizontalmente en móviles */}
+              <div className="overflow-x-auto max-w-full pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                <div className="flex sm:flex-wrap gap-2.5 rounded-2xl bg-neutral-950/60 p-2 border border-white/5 shadow-inner min-w-max sm:min-w-0">
+                  {categories.map((category) => (
+                    <button
+                      key={category.id}
+                      type="button"
+                      onClick={() => changeCategory(category.id)}
+                      className="relative rounded-xl px-5 py-3 text-[11px] font-bold uppercase tracking-widest transition-all duration-300 cursor-pointer select-none"
+                      style={{
+                        backgroundColor: currentCategory.id === category.id ? category.accentColor : 'transparent',
+                        color: currentCategory.id === category.id ? '#0a0a0a' : 'rgba(255,255,255,0.65)',
+                        boxShadow: currentCategory.id === category.id ? `0 4px 20px ${category.accentColor}30` : 'none',
+                        fontWeight: currentCategory.id === category.id ? '800' : '500'
+                      }}
+                    >
+                      {category.name}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -562,7 +564,7 @@ const LandingView = () => {
           <AnimatePresence mode="popLayout">
             <motion.div 
               key={`${currentCategory.id}-${currentSection?.id || ''}`}
-              className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"
+              className="grid gap-6 grid-cols-1 max-w-md mx-auto sm:max-w-none sm:grid-cols-2 lg:grid-cols-3"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -30 }}
@@ -619,71 +621,73 @@ const LandingView = () => {
       <AnimatePresence>
         {offersOpen && (
           <motion.div 
-            className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-950/90 px-4 py-6 backdrop-blur-md" 
+            className="fixed inset-0 z-50 overflow-y-auto bg-neutral-950/90" 
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }}
           >
-            <motion.div 
-              className="relative w-full max-w-lg rounded-[2.5rem] border border-white/10 bg-neutral-950/95 p-8 shadow-2xl backdrop-blur-2xl text-center" 
-              initial={{ scale: 0.95, opacity: 0 }} 
-              animate={{ scale: 1, opacity: 1 }} 
-              exit={{ scale: 0.95, opacity: 0 }} 
-              transition={{ duration: 0.25, ease: 'easeOut' }}
-              style={{
-                borderColor: 'rgba(217, 165, 11, 0.25)',
-                boxShadow: `0 30px 100px rgba(0,0,0,0.9), 0 0 35px ${currentCategory.accentColor}10`
-              }}
-            >
-              <button 
-                type="button" 
-                onClick={() => setOffersOpen(false)} 
-                className="absolute right-6 top-6 rounded-full bg-white/5 border border-white/10 p-3 text-white transition hover:bg-white/10 cursor-pointer"
-              >
-                <X className="h-4 w-4" />
-              </button>
-
-              <div 
-                className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-900 border text-white" 
-                style={{ 
-                  color: currentCategory.accentColor, 
-                  borderColor: 'rgba(217, 165, 11, 0.25)' 
+            <div className="flex min-h-full items-center justify-center p-4 backdrop-blur-md">
+              <motion.div 
+                className="relative w-full max-w-lg rounded-3xl md:rounded-[2.5rem] border border-white/10 bg-neutral-950/95 p-6 md:p-8 shadow-2xl text-center" 
+                initial={{ scale: 0.95, opacity: 0 }} 
+                animate={{ scale: 1, opacity: 1 }} 
+                exit={{ scale: 0.95, opacity: 0 }} 
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+                style={{
+                  borderColor: 'rgba(217, 165, 11, 0.25)',
+                  boxShadow: `0 30px 100px rgba(0,0,0,0.9), 0 0 35px ${currentCategory.accentColor}10`
                 }}
               >
-                <Percent className="h-6 w-6 text-yellow-500" />
-              </div>
-
-              <h2 className="text-2xl font-extrabold tracking-tight lowercase text-white">cédula de cortesía</h2>
-              
-              <div className="mt-6 rounded-3xl border border-white/5 bg-white/5 p-6 space-y-4">
-                <p className="text-xs leading-relaxed text-neutral-300">
-                  Desbloquea el valor de la vitrina. Aplica este código exclusivo de cortesía de la casa para descontar un **20%** en tus adquisiciones.
-                </p>
+                <button 
+                  type="button" 
+                  onClick={() => setOffersOpen(false)} 
+                  className="absolute right-6 top-6 rounded-full bg-white/5 border border-white/10 p-3 text-white transition hover:bg-white/10 cursor-pointer"
+                >
+                  <X className="h-4 w-4" />
+                </button>
 
                 <div 
-                  className="rounded-2xl border py-4 text-2xl font-sans font-bold tracking-[0.25em] select-text text-neutral-950 cursor-pointer"
-                  style={{
-                    backgroundColor: currentCategory.accentColor,
-                    borderColor: currentCategory.accentColor,
-                    boxShadow: `0 0 15px ${currentCategory.accentColor}20`
+                  className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-900 border text-white" 
+                  style={{ 
+                    color: currentCategory.accentColor, 
+                    borderColor: 'rgba(217, 165, 11, 0.25)' 
                   }}
                 >
-                  NEXUS20
+                  <Percent className="h-6 w-6 text-yellow-500" />
                 </div>
 
-                <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-sans font-medium">
-                  Válido en todo el Salón Nexus
-                </p>
-              </div>
+                <h2 className="text-2xl font-extrabold tracking-tight lowercase text-white">cédula de cortesía</h2>
+                
+                <div className="mt-6 rounded-3xl border border-white/5 bg-white/5 p-6 space-y-4">
+                  <p className="text-xs leading-relaxed text-neutral-300">
+                    Desbloquea el valor de la vitrina. Aplica este código exclusivo de cortesía de la casa para descontar un **20%** en tus adquisiciones.
+                  </p>
 
-              <button 
-                type="button" 
-                onClick={() => setOffersOpen(false)} 
-                className="mt-6 w-full rounded-2xl border border-white/10 bg-white/5 py-4 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-white/10 cursor-pointer"
-              >
-                cerrar cédula
-              </button>
-            </motion.div>
+                  <div 
+                    className="rounded-2xl border py-4 text-2xl font-sans font-bold tracking-[0.25em] select-text text-neutral-950 cursor-pointer"
+                    style={{
+                      backgroundColor: currentCategory.accentColor,
+                      borderColor: currentCategory.accentColor,
+                      boxShadow: `0 0 15px ${currentCategory.accentColor}20`
+                    }}
+                  >
+                    NEXUS20
+                  </div>
+
+                  <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-sans font-medium">
+                    Válido en todo el Salón Nexus
+                  </p>
+                </div>
+
+                <button 
+                  type="button" 
+                  onClick={() => setOffersOpen(false)} 
+                  className="mt-6 w-full rounded-2xl border border-white/10 bg-white/5 py-4 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-white/10 cursor-pointer"
+                >
+                  cerrar cédula
+                </button>
+              </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -692,101 +696,103 @@ const LandingView = () => {
       <AnimatePresence>
         {checkoutOpen && (
           <motion.div 
-            className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-950/90 px-4 py-6 backdrop-blur-md" 
+            className="fixed inset-0 z-50 overflow-y-auto bg-neutral-950/90" 
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }}
           >
-            <motion.div 
-              className="relative w-full max-w-2xl rounded-[2.5rem] border border-white/10 bg-neutral-950/95 p-8 md:p-10 shadow-2xl backdrop-blur-2xl" 
-              initial={{ scale: 0.95, opacity: 0 }} 
-              animate={{ scale: 1, opacity: 1 }} 
-              exit={{ scale: 0.95, opacity: 0 }} 
-              transition={{ duration: 0.25, ease: 'easeOut' }}
-              style={{ borderColor: 'rgba(255, 255, 255, 0.08)' }}
-            >
-              <button 
-                type="button" 
-                onClick={() => setCheckoutOpen(false)} 
-                className="absolute right-6 top-6 rounded-full bg-white/5 border border-white/10 p-3 text-white transition hover:bg-white/10 cursor-pointer"
+            <div className="flex min-h-full items-center justify-center p-4 backdrop-blur-md">
+              <motion.div 
+                className="relative w-full max-w-2xl rounded-3xl md:rounded-[2.5rem] border border-white/10 bg-neutral-950/95 p-6 md:p-10 shadow-2xl" 
+                initial={{ scale: 0.95, opacity: 0 }} 
+                animate={{ scale: 1, opacity: 1 }} 
+                exit={{ scale: 0.95, opacity: 0 }} 
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+                style={{ borderColor: 'rgba(255, 255, 255, 0.08)' }}
               >
-                <X className="h-4 w-4" />
-              </button>
-
-              <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
-                <div>
-                  <h2 className="text-3xl font-extrabold tracking-tight lowercase text-white">adquirir lote</h2>
-                  <p className="mt-1.5 text-xs text-neutral-400 font-sans font-medium">resumen de piezas arcanas seleccionadas</p>
-                </div>
-                <span 
-                  className="inline-flex rounded-2xl border px-5 py-3 text-sm font-sans font-bold tracking-wider"
-                  style={{
-                    borderColor: 'rgba(217, 165, 11, 0.25)',
-                    color: 'rgba(217, 165, 11, 0.9)',
-                    backgroundColor: 'rgba(217, 165, 11, 0.02)'
-                  }}
+                <button 
+                  type="button" 
+                  onClick={() => setCheckoutOpen(false)} 
+                  className="absolute right-6 top-6 rounded-full bg-white/5 border border-white/10 p-3 text-white transition hover:bg-white/10 cursor-pointer"
                 >
-                  total: {cartTotal} Bs.
-                </span>
-              </div>
+                  <X className="h-4 w-4" />
+                </button>
 
-              {purchaseComplete ? (
-                <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/5 p-8 text-center space-y-4">
-                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 animate-pulse">
-                    <CreditCard className="h-6 w-6" />
+                <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
+                  <div>
+                    <h2 className="text-3xl font-extrabold tracking-tight lowercase text-white">adquirir lote</h2>
+                    <p className="mt-1.5 text-xs text-neutral-400 font-sans font-medium">resumen de piezas arcanas seleccionadas</p>
                   </div>
-                  <h3 className="text-xl font-bold lowercase text-white">adquisición completada</h3>
-                  <p className="text-xs leading-relaxed text-neutral-400 max-w-md mx-auto">
-                    Tu orden de adquisición en Bolivianos (Bs.) ha sido procesada correctamente en modalidad de simulación. Tu lote ha sido resguardado.
-                  </p>
-                  <button 
-                    type="button" 
-                    onClick={() => { setPurchaseComplete(false); setCheckoutOpen(false); }} 
-                    className="rounded-2xl bg-white text-neutral-950 px-6 py-3.5 text-xs font-bold uppercase tracking-widest transition hover:bg-neutral-200"
+                  <span 
+                    className="inline-flex rounded-2xl border px-5 py-3 text-sm font-sans font-bold tracking-wider"
+                    style={{
+                      borderColor: 'rgba(217, 165, 11, 0.25)',
+                      color: 'rgba(217, 165, 11, 0.9)',
+                      backgroundColor: 'rgba(217, 165, 11, 0.02)'
+                    }}
                   >
-                    volver al salón
-                  </button>
+                    total: {cartTotal} Bs.
+                  </span>
                 </div>
-              ) : (
-                <div className="grid gap-6">
-                  {/* Lista de Artículos */}
-                  <div className="space-y-3 max-h-[250px] overflow-y-auto pr-1">
-                    {cartItems.length ? cartItems.map((item) => (
-                      <div key={item.id} className="rounded-2xl border border-white/5 bg-white/5 p-4 flex items-center justify-between gap-4">
-                        <div>
-                          <p className="text-sm font-bold text-white lowercase">{item.name}</p>
-                          <p className="text-[10px] text-neutral-400 mt-1 font-sans">
-                            {item.quantity} unidades × {item.precioVenta} Bs.
-                          </p>
-                        </div>
-                        <p className="text-sm font-bold text-white">
-                          {(item.quantity * item.precioVenta).toFixed(2)} Bs.
-                        </p>
-                      </div>
-                    )) : (
-                      <div className="rounded-2xl border border-dashed border-white/10 bg-neutral-900/40 p-8 text-center text-xs text-neutral-500 font-sans">
-                        No hay piezas resguardadas en tu cofre actualmente.
-                      </div>
-                    )}
-                  </div>
 
-                  {/* Botón de Pago */}
-                  {cartItems.length > 0 && (
+                {purchaseComplete ? (
+                  <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/5 p-8 text-center space-y-4">
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 animate-pulse">
+                      <CreditCard className="h-6 w-6" />
+                    </div>
+                    <h3 className="text-xl font-bold lowercase text-white">adquisición completada</h3>
+                    <p className="text-xs leading-relaxed text-neutral-400 max-w-md mx-auto">
+                      Tu orden de adquisición en Bolivianos (Bs.) ha sido procesada correctamente en modalidad de simulación. Tu lote ha sido resguardado.
+                    </p>
                     <button 
                       type="button" 
-                      onClick={() => setPurchaseComplete(true)} 
-                      className="w-full rounded-2xl py-4 text-xs font-bold uppercase tracking-widest text-neutral-950 transition-all hover:brightness-110 active:scale-[0.98] cursor-pointer"
-                      style={{
-                        backgroundColor: currentCategory.accentColor,
-                        boxShadow: `0 0 20px ${currentCategory.accentColor}25`
-                      }}
+                      onClick={() => { setPurchaseComplete(false); setCheckoutOpen(false); }} 
+                      className="rounded-2xl bg-white text-neutral-950 px-6 py-3.5 text-xs font-bold uppercase tracking-widest transition hover:bg-neutral-200"
                     >
-                      adquirir lote completo
+                      volver al salón
                     </button>
-                  )}
-                </div>
-              )}
-            </motion.div>
+                  </div>
+                ) : (
+                  <div className="grid gap-6">
+                    {/* Lista de Artículos */}
+                    <div className="space-y-3 max-h-[250px] overflow-y-auto pr-1">
+                      {cartItems.length ? cartItems.map((item) => (
+                        <div key={item.id} className="rounded-2xl border border-white/5 bg-white/5 p-4 flex items-center justify-between gap-4">
+                          <div>
+                            <p className="text-sm font-bold text-white lowercase">{item.name}</p>
+                            <p className="text-[10px] text-neutral-400 mt-1 font-sans">
+                              {item.quantity} unidades × {item.precioVenta} Bs.
+                            </p>
+                          </div>
+                          <p className="text-sm font-bold text-white">
+                            {(item.quantity * item.precioVenta).toFixed(2)} Bs.
+                          </p>
+                        </div>
+                      )) : (
+                        <div className="rounded-2xl border border-dashed border-white/10 bg-neutral-900/40 p-8 text-center text-xs text-neutral-500 font-sans">
+                          No hay piezas resguardadas en tu cofre actualmente.
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Botón de Pago */}
+                    {cartItems.length > 0 && (
+                      <button 
+                        type="button" 
+                        onClick={() => setPurchaseComplete(true)} 
+                        className="w-full rounded-2xl py-4 text-xs font-bold uppercase tracking-widest text-neutral-950 transition-all hover:brightness-110 active:scale-[0.98] cursor-pointer"
+                        style={{
+                          backgroundColor: currentCategory.accentColor,
+                          boxShadow: `0 0 20px ${currentCategory.accentColor}25`
+                        }}
+                      >
+                        adquirir lote completo
+                      </button>
+                    )}
+                  </div>
+                )}
+              </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
