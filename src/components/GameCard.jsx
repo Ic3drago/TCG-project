@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 const GameCard = ({ product, accentColor = '#22d3ee', onAdd, onView }) => {
   const [hovered, setHovered] = useState(false);
@@ -56,11 +57,8 @@ const GameCard = ({ product, accentColor = '#22d3ee', onAdd, onView }) => {
     setCoords({ x: 0.5, y: 0.5 });
   };
 
-  // Consumir imagen local del mazo si existe, si no, usar la ruta del producto
-  const localImageSrc = `/assets/cartas/${product.id}.png`;
-  const imageSrc = product.image?.startsWith('http') 
-    ? `/assets/cartas/${product.id}.png` // Priorizar carpeta local assets
-    : product.image || localImageSrc;
+  // Consumir directamente la URL externa proporcionada en el modelo
+  const imageSrc = product.image || `/assets/cartas/${product.id}.png`;
 
   return (
     <motion.article
@@ -77,22 +75,35 @@ const GameCard = ({ product, accentColor = '#22d3ee', onAdd, onView }) => {
         perspective: 1200,
         rotateX: rotate.x,
         rotateY: rotate.y,
-        borderColor: hovered ? 'rgba(217, 165, 11, 0.45)' : 'rgba(255, 255, 255, 0.08)',
-        boxShadow: hovered 
-          ? `0 35px 70px -15px rgba(0, 0, 0, 0.95), 0 0 35px ${accentColor}25, inset 0 1px 1px rgba(255,255,255,0.08)` 
-          : '0 15px 35px -15px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255,255,255,0.03)',
-        transition: 'border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), rotateX 0.1s ease, rotateY 0.1s ease'
+        // Mantener sombras estáticas base súper ligeras para evitar re-pintados pesados en el contenedor
+        boxShadow: '0 10px 25px -10px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.03)',
+        transition: 'rotateX 0.15s cubic-bezier(0.25, 1, 0.5, 1), rotateY 0.15s cubic-bezier(0.25, 1, 0.5, 1)',
+        willChange: 'transform'
       }}
-      className="relative flex flex-col h-full cursor-pointer overflow-hidden rounded-[2.2rem] border bg-neutral-950/45 p-5 backdrop-blur-xl select-none"
+      // Optimización de Firefox: Usar backdrop-blur-md (más liviano) con bg-neutral-950/85 (más opaco) para reducir el procesamiento compositor de pixeles detrás de la tarjeta.
+      className="relative flex flex-col h-full cursor-pointer overflow-hidden rounded-[2.2rem] border border-white/5 bg-neutral-950/85 p-5 backdrop-blur-md select-none"
     >
+      {/* CAPA DE SOMBRA Y BORDE GLOW DE HOVER OPTIMIZADA:
+          En lugar de transicionar box-shadow y border-color en el elemento principal (lo que fuerza repintado completo),
+          animamos únicamente la OPACIDAD de este contenedor absoluto que corre 100% sobre la GPU. */}
+      <div 
+        className="absolute inset-0 rounded-[2.2rem] pointer-events-none z-0 transition-opacity duration-500 ease-out border border-amber-500/35"
+        style={{
+          boxShadow: `0 30px 60px -15px rgba(0, 0, 0, 0.9), 0 0 30px ${accentColor}20`,
+          opacity: hovered ? 1 : 0,
+          willChange: 'opacity'
+        }}
+      />
+
       {/* 1. Capa Holográfica Premium (Efecto Reflejo de Prisma Fino) */}
       <div 
-        className="absolute inset-0 pointer-events-none z-20 transition-opacity duration-500"
+        className="absolute inset-0 pointer-events-none z-20"
         style={{
           background: `radial-gradient(circle at ${coords.x * 100}% ${coords.y * 100}%, rgba(255, 255, 255, 0.15) 0%, rgba(217, 165, 11, 0.08) 25%, rgba(138, 43, 226, 0.08) 50%, transparent 80%)`,
           opacity: hovered ? 0.9 : 0,
           mixBlendMode: 'overlay',
-          transition: 'opacity 0.4s ease'
+          transition: 'opacity 0.4s ease',
+          willChange: 'opacity, background'
         }}
       />
       
@@ -128,21 +139,19 @@ const GameCard = ({ product, accentColor = '#22d3ee', onAdd, onView }) => {
           </span>
         </div>
 
-        {/* Imagen del Producto (Con manejador de error local -> remoto) */}
-        <div className="relative overflow-hidden rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.65)] border border-white/5 aspect-[4/3] bg-neutral-950">
-          <img
+        {/* Imagen del Producto (Uso correcto del componente <Image> de Next.js con fill) */}
+        <div className="relative overflow-hidden rounded-2xl shadow-[0_12px_30px_rgba(0,0,0,0.6)] border border-white/5 aspect-[4/3] bg-neutral-950">
+          <Image
             src={imageSrc}
-            onError={(e) => {
-              // Si la imagen local falla o no existe, caemos automáticamente en la remota
-              if (e.currentTarget.src !== product.image) {
-                e.currentTarget.src = product.image;
-              }
-            }}
             alt={product.name}
-            className="h-full w-full object-cover transition-transform duration-[1000ms] ease-out"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+            className="object-cover transition-transform duration-[1000ms] ease-out"
             style={{
-              transform: hovered ? 'scale(1.05)' : 'scale(1)'
+              transform: hovered ? 'scale(1.05)' : 'scale(1)',
+              willChange: 'transform'
             }}
+            priority={product.section === 'cards'} // Carga con fetchpriority alta a las cartas principales
           />
           <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-transparent to-transparent opacity-85" />
         </div>
@@ -190,5 +199,3 @@ const GameCard = ({ product, accentColor = '#22d3ee', onAdd, onView }) => {
 };
 
 export default GameCard;
-
-

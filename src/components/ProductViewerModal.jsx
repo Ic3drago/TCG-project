@@ -2,7 +2,8 @@
 
 import { useEffect } from 'react';
 import { motion, useMotionValue, useTransform, useSpring, AnimatePresence } from 'framer-motion';
-import { X, ShoppingCart, Award, Sparkles } from 'lucide-react';
+import { X, ShoppingCart, Award } from 'lucide-react';
+import Image from 'next/image';
 
 const ProductViewerModal = ({ isOpen, onClose, product, accentColor = '#22d3ee', onAdd }) => {
   // Bloquear el scroll del body cuando el modal está abierto
@@ -22,7 +23,7 @@ const ProductViewerModal = ({ isOpen, onClose, product, accentColor = '#22d3ee',
   const mouseY = useMotionValue(0);
 
   // Configuración de resortes (Physics Engine para efecto TCG Pocket)
-  const springConfig = { stiffness: 100, damping: 15, mass: 0.8 };
+  const springConfig = { stiffness: 120, damping: 18, mass: 0.8 };
   const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [18, -18]), springConfig);
   const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-18, 18]), springConfig);
 
@@ -31,10 +32,6 @@ const ProductViewerModal = ({ isOpen, onClose, product, accentColor = '#22d3ee',
     [mouseX, mouseY],
     ([x, y]) => `radial-gradient(circle at ${(x + 0.5) * 100}% ${(y + 0.5) * 100}%, rgba(255, 255, 255, 0.35) 0%, rgba(217, 165, 11, 0.15) 20%, rgba(138, 43, 226, 0.18) 40%, rgba(0, 255, 255, 0.15) 60%, transparent 80%)`
   );
-
-  // Sombra proyectada dinámica según la inclinación
-  const shadowX = useSpring(useTransform(mouseX, [-0.5, 0.5], [15, -15]), springConfig);
-  const shadowY = useSpring(useTransform(mouseY, [-0.5, 0.5], [15, -15]), springConfig);
 
   if (!isOpen || !product) return null;
 
@@ -59,15 +56,13 @@ const ProductViewerModal = ({ isOpen, onClose, product, accentColor = '#22d3ee',
     mouseY.set(0);
   };
 
-  // Consumir imágenes locales con fallbacks
-  const localImageSrc = `/assets/cartas/${product.id}.png`;
-  const imageSrc = product.image?.startsWith('http') 
-    ? `/assets/cartas/${product.id}.png` // Priorizar carpeta local assets
-    : product.image || localImageSrc;
+  // Consumir directamente la URL externa proporcionada en el modelo
+  const imageSrc = product.image || `/assets/cartas/${product.id}.png`;
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-10 overflow-y-auto bg-black/85 backdrop-blur-2xl">
+      {/* Fondo oscuro: Reducimos el desenfoque anidado pesado de backdrop-blur-2xl a backdrop-blur-md y aumentamos opacidad bg-black/90 para ahorrar GPU en Firefox */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-10 overflow-y-auto bg-black/90 backdrop-blur-md">
         
         {/* Fondo oscuro cerrable */}
         <div 
@@ -83,13 +78,15 @@ const ProductViewerModal = ({ isOpen, onClose, product, accentColor = '#22d3ee',
           <X className="h-5 w-5" />
         </button>
 
-        {/* Contenedor del Modal Premium Gilded */}
+        {/* Contenedor del Modal Premium Gilded
+            Optimización: Removemos el costoso backdrop-blur-xl redundante porque ya está encima de una capa opaca/borrosa.
+            Esto previene que Firefox dibuje doble pasada de desenfoque de píxeles superpuestos. */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ duration: 0.4, ease: 'easeOut' }}
-          className="relative z-10 w-full max-w-5xl rounded-[3rem] border border-white/10 bg-neutral-950/65 shadow-2xl backdrop-blur-xl overflow-hidden p-6 md:p-10 grid gap-8 lg:grid-cols-12"
+          className="relative z-10 w-full max-w-5xl rounded-[3rem] border border-white/10 bg-neutral-950/95 shadow-2xl overflow-hidden p-6 md:p-10 grid gap-8 lg:grid-cols-12"
           style={{
             borderColor: 'rgba(255, 255, 255, 0.08)',
             boxShadow: `0 35px 80px rgba(0,0,0,0.95), inset 0 1px 1px rgba(255,255,255,0.05), 0 0 40px ${accentColor}10`
@@ -109,7 +106,8 @@ const ProductViewerModal = ({ isOpen, onClose, product, accentColor = '#22d3ee',
                 perspective: 1200,
                 rotateX: rotateX,
                 rotateY: rotateY,
-                boxShadow: `0 40px 80px -15px rgba(0, 0, 0, 0.85)`
+                boxShadow: `0 30px 60px -15px rgba(0, 0, 0, 0.85)`,
+                willChange: 'transform'
               }}
             >
               
@@ -132,7 +130,8 @@ const ProductViewerModal = ({ isOpen, onClose, product, accentColor = '#22d3ee',
                   style={{
                     background: foilBg,
                     mixBlendMode: 'color-dodge',
-                    opacity: 0.85
+                    opacity: 0.85,
+                    willChange: 'background'
                   }}
                 />
               )}
@@ -140,17 +139,15 @@ const ProductViewerModal = ({ isOpen, onClose, product, accentColor = '#22d3ee',
               {/* Brillo lineal exterior de estuche acrílico */}
               <div className="absolute inset-0 rounded-[1.8rem] bg-gradient-to-tr from-white/0 via-white/5 to-white/0 pointer-events-none z-20" />
 
-              {/* Imagen del Producto en Inspección */}
+              {/* Imagen del Producto en Inspección con next/image y fill */}
               <div className="absolute inset-2 overflow-hidden rounded-2xl bg-neutral-950 border border-white/5 shadow-inner">
-                <img
+                <Image
                   src={imageSrc}
-                  onError={(e) => {
-                    if (e.currentTarget.src !== product.image) {
-                      e.currentTarget.src = product.image;
-                    }
-                  }}
                   alt={product.name}
-                  className="h-full w-full object-cover"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 30vw"
+                  className="object-cover"
+                  priority={true} // El visor del modal es de máxima prioridad
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/80 via-transparent to-transparent pointer-events-none z-10" />
               </div>
@@ -186,7 +183,7 @@ const ProductViewerModal = ({ isOpen, onClose, product, accentColor = '#22d3ee',
             </div>
 
             {/* Ficha Técnica de Coleccionista */}
-            <div className="rounded-2xl border border-white/10 bg-neutral-950/50 p-6 space-y-4 backdrop-blur-xl">
+            <div className="rounded-2xl border border-white/10 bg-neutral-950/50 p-6 space-y-4">
               <h3 className="text-xs font-bold uppercase tracking-widest text-yellow-500/90 font-sans border-b border-white/10 pb-2">
                 Ficha Técnica Curatorial
               </h3>

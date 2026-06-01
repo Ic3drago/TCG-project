@@ -19,6 +19,7 @@ import {
 import { useStoreController } from '../controllers/useStoreController';
 import GameCard from '../components/GameCard';
 import ProductViewerModal from '../components/ProductViewerModal';
+import Image from 'next/image';
 
 const LandingView = () => {
   const {
@@ -70,11 +71,8 @@ const LandingView = () => {
     }
   };
 
-  // Mapeo inteligente de fondo local con fallback
-  const localBgUrl = `/imagenes/fondos/${currentCategory.id}.jpg`;
-  const bgUrl = currentCategory.backgroundUrl?.startsWith('http') 
-    ? `/imagenes/fondos/${currentCategory.id}.jpg` // Buscar primero local
-    : currentCategory.backgroundUrl || localBgUrl;
+  // Consumir la URL externa del fondo directamente sin fallbacks locales inexistentes que provoquen 404
+  const bgUrl = currentCategory.backgroundUrl || `/imagenes/fondos/${currentCategory.id}.jpg`;
 
   return (
     <div 
@@ -85,22 +83,24 @@ const LandingView = () => {
           1. FONDO GLOBAL DINÁMICO (Scroll Global de Cristal)
           ======================================================== */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        {/* Imagen de Fondo Dinámica */}
-        <motion.img
+        {/* Imagen de Fondo Dinámica con next/image optimizada por GPU */}
+        <motion.div
           key={currentCategory.id}
-          src={bgUrl}
-          onError={(e) => {
-            if (e.currentTarget.src !== currentCategory.backgroundUrl) {
-              e.currentTarget.src = currentCategory.backgroundUrl;
-            }
-          }}
-          alt="TCG Premium Atmosphere"
           style={{
             scale: bgScale,
             opacity: bgOpacity,
           }}
-          className="absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-out"
-        />
+          className="absolute inset-0 h-full w-full transition-opacity duration-1000 ease-out"
+        >
+          <Image
+            src={bgUrl}
+            alt="TCG Premium Atmosphere"
+            fill
+            priority={true}
+            sizes="100vw"
+            className="object-cover"
+          />
+        </motion.div>
 
         {/* Gradientes de Fusión Atmosférica y Neblinas de Luz */}
         <div className="absolute inset-0 bg-gradient-to-b from-neutral-950/40 via-neutral-950/75 to-neutral-950" />

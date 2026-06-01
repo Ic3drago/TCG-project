@@ -1,16 +1,20 @@
 "use client"
 
 import React from 'react'
+import Image from 'next/image'
 
 export default function HeroSecurify({ onNavigate = () => {}, accentColor = '#22d3ee' }) {
   return (
     <header className="relative h-screen w-full overflow-hidden bg-black select-none antialiased">
-      {/* Fondo Dinámico TCG de Alto Impacto */}
+      {/* Fondo Dinámico TCG de Alto Impacto con next/image y fill */}
       <div className="absolute inset-0 w-full h-full">
-        <img
+        <Image
           src="/tcg_hero_bg.png"
           alt="TCG Cyberpunk Arena"
-          className="absolute inset-0 w-full h-full object-cover opacity-50 transition-transform duration-[20000ms] ease-out scale-110"
+          fill
+          priority={true} // Al ser el fondo principal y candidate LCP, se prioriza la carga inmediata
+          sizes="100vw"
+          className="object-cover opacity-50 transition-transform duration-[20000ms] ease-out scale-110"
           style={{
             animation: 'slowZoom 20s infinite alternate'
           }}
@@ -38,7 +42,7 @@ export default function HeroSecurify({ onNavigate = () => {}, accentColor = '#22
         }
       `}</style>
 
-      {/* Navbar Flotante (Glassmorphism) */}
+      {/* Navbar Flotante (Glassmorphism Suave) */}
       <nav className="absolute top-0 left-0 right-0 z-20 px-6 pt-6 flex items-center justify-between gap-4">
         {/* Píldora Izquierda */}
         <div className="flex items-center gap-2 bg-neutral-900/80 backdrop-blur-md border border-white/5 rounded-full pl-4 pr-6 py-3 shadow-[0_10px_30px_rgba(0,0,0,0.4)]">
